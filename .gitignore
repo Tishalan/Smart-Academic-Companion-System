@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+.venv/
+env/
+.env/
+
+# Uploads and User generated content
+uploads/*
+!uploads/.gitkeep
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+app/static/reports/*
+!app/static/reports/.gitkeep
+
+# Data files (Exclude large seed data if any)
+data/*.xlsx
+data/*.csv
+
+# Ad-hoc test files and output
+test_output.pdf
+test_slide.pptx
+test_ppt.py
+scripts/scratchpad_stats.py
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
