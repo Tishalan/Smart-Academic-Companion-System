@@ -296,18 +296,12 @@ The system was evaluated with 18 structured functional test cases covering authe
 
 ---
 
-## Documentation
-
-The full project report is included in the repository as `E225097_FINAL_PROJECT_.pdf` covering introduction, literature review, system design and architecture, implementation, testing and evaluation, and conclusions.
-
----
-
 ## Author
 
 Satkunam Tishalan
-BSc in Data Science, ESOFT Blended / London Metropolitan University
-Student ID: E225097 | London Met ID: 25027320
-Email: E225097@esoft.academy
+BSc in Data Science, London Metropolitan University
+London Met ID: 25027320
+Email: SAT1177@my.londonmet.ac.uk
 
 Supervisors: Mr. E. Mithurshanan and Mr. V. Jathushan
 
