@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Lecturer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        border-radius: 20px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    .quick-action-btn {
+        border-radius: 12px;
+        padding: 12px;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #444;
+        background: #f8f9fa;
+    }
+    .quick-action-btn:hover {
+        background: #e9ecef;
+        transform: scale(1.05);
+    }
+    .filter-pill {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .filter-pill:hover {
+        opacity: 0.8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Lecturer Dashboard</h2>
+        <p class="text-muted">Welcome back, {{ current_user.full_name }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('lecturer.lectures') }}" class="btn btn-primary-gradient shadow-sm">
+            <i class="fas fa-plus me-2"></i>New Lecture
+        </a>
+        <button class="btn btn-white border shadow-sm" onclick="window.print()">
+            <i class="fas fa-download me-2"></i>Export Report
+        </button>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card card-premium h-100 p-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                    <i class="fas fa-book-open text-primary fs-4"></i>
+                </div>
+                <span class="badge badge-premium bg-success bg-opacity-10 text-success">+2 New</span>
+            </div>
+            <h6 class="text-muted mb-1 small text-uppercase">Active Modules</h6>
+            <h2 class="fw-bold mb-0" style="color: var(--text-dark);">{{ stats.total_modules }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-premium h-100 p-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                    <i class="fas fa-tasks text-success fs-4"></i>
+                </div>
+            </div>
+            <h6 class="text-muted mb-1 small text-uppercase">Total Assignments</h6>
+            <h2 class="fw-bold mb-0" style="color: var(--status-success);">{{ stats.total_assignments }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-premium h-100 p-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                    <i class="fas fa-user-clock text-warning fs-4"></i>
+                </div>
+            </div>
+            <h6 class="text-muted mb-1 small text-uppercase">Pending Grading</h6>
+            <h2 class="fw-bold mb-0" style="color: var(--status-warning);">{{ stats.pending_grading }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-premium h-100 p-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                    <i class="fas fa-exclamation-triangle text-danger fs-4"></i>
+                </div>
+            </div>
+            <h6 class="text-muted mb-1 small text-uppercase">At-Risk Students</h6>
+            <h2 class="fw-bold mb-0" style="color: var(--status-danger);">{{ at_risk_students|length }}</h2>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Visualizations -->
+    <div class="col-lg-8">
+        <div class="card card-premium p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">Performance Trends</h5>
+                <select class="form-select form-select-sm w-auto border-0 bg-light rounded-pill px-3">
+                    <option>Last 6 Months</option>
+                    <option>Current Semester</option>
+                </select>
+            </div>
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions & Alerts -->
+    <div class="col-lg-4">
+        <div class="card card-premium p-4 h-100">
+            <h5 class="fw-bold mb-4">Quick Actions</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-4">
+                    <a href="{{ url_for('lecturer.assignments') }}" class="quick-action-btn">
+                        <i class="fas fa-pencil-alt text-primary fs-4"></i>
+                        <span class="fw-bold">Assign</span>
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a href="{{ url_for('lecturer.announcements') }}" class="quick-action-btn">
+                        <i class="fas fa-bullhorn text-warning fs-4"></i>
+                        <span class="fw-bold">Notify</span>
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a href="{{ url_for('lecturer.grading') }}" class="quick-action-btn">
+                        <i class="fas fa-check-double text-success fs-4"></i>
+                        <span class="fw-bold">Grade</span>
+                    </a>
+                </div>
+            </div>
+            
+            <h5 class="fw-bold mb-3">Recent Alerts</h5>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item px-0 border-0 mb-2">
+                    <div class="d-flex gap-3">
+                        <div class="p-2 bg-danger bg-opacity-10 rounded-3 text-danger">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 small fw-bold">Low Attendance Alert</p>
+                            <small class="text-muted">3 students dropped below 80%</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-group-item px-0 border-0">
+                    <div class="d-flex gap-3">
+                        <div class="p-2 bg-info bg-opacity-10 rounded-3 text-info">
+                            <i class="fas fa-file-upload"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 small fw-bold">New Submissions</p>
+                            <small class="text-muted">12 new files for 'ML Project'</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Student Risk List -->
+    <div class="col-lg-8">
+        <div class="card card-premium p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">Dropout Risk Monitoring</h5>
+                    <small class="text-muted">AI-powered engagement analysis</small>
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="badge badge-premium bg-danger bg-opacity-10 text-danger">High Risk</span>
+                    <span class="badge badge-premium bg-warning bg-opacity-10 text-warning">Moderate</span>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="bg-light text-muted small">
+                        <tr>
+                            <th>Student</th>
+                            <th>Current GPA</th>
+                            <th>Risk Probability</th>
+                            <th>Status</th>
+                            <th>Insights</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in at_risk_students %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar-sm bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                        {{ student.user.full_name[0] }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold small">{{ student.user.full_name }}</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">{{ student.student_id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="fw-bold">{{ "%.2f"|format(student.GPA) }}</span></td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 6px; min-width: 80px;">
+                                        <div class="progress-bar {% if student.risk_score > 0.7 %}bg-danger{% else %}bg-warning{% endif %}"
+                                            style="width: {{ student.risk_score * 100 }}%;"></div>
+                                    </div>
+                                    <small class="fw-bold">{{ (student.risk_score * 100)|int }}%</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-premium {% if student.risk_score > 0.7 %}bg-danger{% else %}bg-warning{% endif %} bg-opacity-10 {% if student.risk_score > 0.7 %}text-danger{% else %}text-warning{% endif %}">
+                                    {% if student.risk_score > 0.7 %}High Risk{% else %}Warning{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-light rounded-circle"><i class="fas fa-brain text-primary"></i></button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Module Overview -->
+    <div class="col-lg-4">
+        <div class="card card-premium p-4 h-100">
+            <h5 class="fw-bold mb-4">Module Insights</h5>
+            <div class="chart-container mb-4" style="height: 200px;">
+                <canvas id="moduleGradingChart"></canvas>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for module in modules %}
+                <div class="list-group-item px-0 border-0 mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0 fw-bold">{{ module.module_name }}</h6>
+                            <small class="text-muted">{{ module.module_code }} • {{ module.enrollments.count() }} students</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="d-block fw-bold text-primary">{{ module.get_average_attendance()|int }}%</span>
+                            <small class="text-muted" style="font-size: 0.7rem;">Attendance</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Academic Performance Chart
+    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+    new Chart(performanceCtx, {
+        type: 'line',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'],
+            datasets: [{
+                label: 'Avg Class Score',
+                data: [65, 72, 68, 75, 82, 78, 85, 88],
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }, {
+                label: 'Avg Attendance',
+                data: [90, 88, 85, 82, 85, 80, 82, 78],
+                borderColor: '#764ba2',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', labels: { usePointStyle: true, font: { family: "'Inter', sans-serif" } } }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { borderDash: [2, 2] } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Module Grading Distribution (Pie Chart)
+    const moduleCtx = document.getElementById('moduleGradingChart').getContext('2d');
+    new Chart(moduleCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Distinction', 'Merit', 'Pass', 'Fail'],
+            datasets: [{
+                data: [35, 45, 15, 5],
+                backgroundColor: ['#2ed573', '#ffa502', '#667eea', '#ff4757'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }
+            }
+        }
+    });
+</script>
+{% endblock %}

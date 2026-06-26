@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Announcements - Lecturer{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Broadcasting Center</h2>
+        <p class="text-muted">Send important notices and academic updates to your modules.</p>
+    </div>
+    <button class="btn btn-primary-gradient px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#announcementModal">
+        <i class="fas fa-bullhorn me-2"></i>Create Notice
+    </button>
+</div>
+
+<!-- Announcement Modal -->
+<div class="modal fade" id="announcementModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Compose Broadcast</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{{ url_for('lecturer.announcements') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 0.05em;">Target Module</label>
+                        <select name="module_id" class="form-select rounded-3 border-0 bg-light py-3 px-4" required>
+                            {% for module in modules %}
+                            <option value="{{ module.id }}">{{ module.module_code }} - {{ module.module_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 0.05em;">Headline</label>
+                        <input type="text" name="title" class="form-control rounded-3 border-0 bg-light py-3 px-4" placeholder="e.g. Workshop Session Postponed" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase" style="letter-spacing: 0.05em;">Message Content</label>
+                        <textarea name="content" class="form-control rounded-4 border-0 bg-light py-3 px-4" rows="5" placeholder="Type your announcement details here..." required></textarea>
+                    </div>
+                    <div class="modal-footer border-0 p-0 mt-5">
+                        <button type="submit" class="btn btn-primary-gradient w-100 rounded-pill py-3 shadow fw-bold">
+                            <i class="fas fa-paper-plane me-2"></i>Send Broadcast
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for announcement in announcements %}
+    <div class="col-md-12">
+        <div class="card card-premium p-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle">
+                        <i class="fas fa-broadcast-tower fs-5"></i>
+                    </div>
+                    <div>
+                        <span class="badge badge-premium bg-light text-primary border-0 mb-1">{{ announcement.module.module_code }}</span>
+                        <h5 class="fw-bold mb-0 text-dark">{{ announcement.title }}</h5>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.65rem;">{{ announcement.created_at.strftime('%d %b, %Y') }}</small>
+                    <small class="text-muted" style="font-size: 0.65rem;">{{ announcement.created_at.strftime('%I:%M %p') }}</small>
+                </div>
+            </div>
+            
+            <div class="bg-light p-4 rounded-4 mb-4 border-start border-4 border-primary">
+                <p class="mb-0 fs-6 text-dark" style="line-height: 1.6;">{{ announcement.content }}</p>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="small text-muted d-flex align-items-center gap-2">
+                    <div class="avatar-xs bg-secondary rounded-circle" style="width: 20px; height: 20px;"></div>
+                    <span class="fw-bold">Broadcast Author: {{ current_user.full_name }}</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-light btn-sm rounded-pill px-3 fw-bold text-muted border-0 shadow-sm">Edit</button>
+                    <button class="btn btn-light btn-sm rounded-pill px-3 fw-bold text-danger border-0 shadow-sm">Remove</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="bg-light d-inline-block p-4 rounded-circle mb-3">
+            <i class="fas fa-comment-slash fa-3x text-muted opacity-25"></i>
+        </div>
+        <h5 class="text-muted fw-bold">Broadcast Inbox Empty</h5>
+        <p class="text-muted small">Share important news with your students using the button above.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

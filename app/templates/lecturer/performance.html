@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Performance - Lecturer{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold mb-1">Performance Analytics</h2>
+        <p class="text-muted">In-depth insights and academic trends for your assigned modules.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for module in modules %}
+    <div class="col-md-6">
+        <div class="card card-premium p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="fw-bold mb-0" style="color: var(--text-dark);">{{ module.module_name }}</h5>
+                    <small class="text-muted fw-bold">{{ module.module_code }}</small>
+                </div>
+                <span class="badge badge-premium bg-primary bg-opacity-10 text-primary">{{ module.enrollments.count() }} Enrolled</span>
+            </div>
+
+            <div class="bg-light p-4 rounded-4 mb-4">
+                <div class="row g-3 text-center">
+                    <div class="col-4">
+                        <small class="text-muted d-block text-uppercase mb-2" style="font-size: 0.6rem; letter-spacing: 0.05em;">Attendance</small>
+                        <h4 class="fw-bold mb-0 text-dark">{{ module.get_average_attendance()|int }}%</h4>
+                    </div>
+                    <div class="col-4 border-start border-end">
+                        <small class="text-muted d-block text-uppercase mb-2" style="font-size: 0.6rem; letter-spacing: 0.05em;">Avg GPA</small>
+                        <h4 class="fw-bold mb-0 text-primary">3.2</h4>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted d-block text-uppercase mb-2" style="font-size: 0.6rem; letter-spacing: 0.05em;">At Risk</small>
+                        <h4 class="fw-bold mb-0 text-danger">3</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button class="btn btn-outline-primary rounded-pill py-2 shadow-sm fw-bold">
+                    <i class="fas fa-chart-line me-2"></i>Detailed Module Report
+                </button>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="bg-light d-inline-block p-4 rounded-circle mb-3">
+            <i class="fas fa-chart-bar fa-3x text-muted opacity-25"></i>
+        </div>
+        <h5 class="text-muted fw-bold">No data available.</h5>
+        <p class="text-muted small">Analytics will appear once modules are assigned and data is processed.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

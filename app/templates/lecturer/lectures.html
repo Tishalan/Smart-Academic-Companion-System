@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Lectures & Timetable - Lecturer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timetable-grid {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    .timetable-header {
+        background: #f8f9fa;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        color: #64748b;
+    }
+    .slot-row {
+        border-bottom: 1px solid rgba(0,0,0,0.03);
+    }
+    .time-col {
+        background: #f8f9fa;
+        width: 100px;
+        min-width: 100px;
+        border-right: 1px solid rgba(0,0,0,0.03);
+    }
+    .day-col {
+        min-width: 150px;
+        height: 100px;
+        padding: 5px;
+    }
+    .session-block {
+        height: 100%;
+        border-radius: 12px;
+        padding: 10px;
+        font-size: 0.75rem;
+        border-left: 4px solid #667eea;
+        background: rgba(102, 126, 234, 0.05);
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .session-block:hover {
+        transform: translateY(-2px);
+        background: rgba(102, 126, 234, 0.1);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    }
+    .session-block.is-current {
+        border-left-color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
+        animation: pulse-live 2s infinite;
+    }
+    @keyframes pulse-live {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .today-highlight {
+        background: rgba(102, 126, 234, 0.02);
+    }
+    .lunch-row {
+        background: #fdfdfd;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Teaching Schedule</h2>
+        <p class="text-muted">View your assigned sessions and weekly timetable.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-white border shadow-sm px-4 rounded-pill" onclick="window.print()">
+            <i class="fas fa-print me-2"></i>Print Schedule
+        </button>
+    </div>
+</div>
+
+<!-- Tabs for View Mode -->
+<ul class="nav nav-pills mb-4 bg-white p-2 rounded-pill shadow-sm d-inline-flex" id="pills-tab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active rounded-pill px-4" id="pills-timetable-tab" data-bs-toggle="pill" data-bs-target="#pills-timetable" type="button">
+            <i class="fas fa-table me-2"></i>Weekly Timetable
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link rounded-pill px-4" id="pills-sessions-tab" data-bs-toggle="pill" data-bs-target="#pills-sessions" type="button">
+            <i class="fas fa-th-large me-2"></i>Session Cards
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="pills-tabContent">
+    <!-- Timetable Grid View -->
+    <div class="tab-pane fade show active" id="pills-timetable" role="tabpanel">
+        <div class="timetable-grid">
+            <div class="table-responsive">
+                <table class="table table-borderless mb-0">
+                    <thead>
+                        <tr class="timetable-header">
+                            <th class="time-col p-3 text-center">Time</th>
+                            {% for day in days %}
+                            <th class="p-3 text-center {% if day == today_name %}text-primary today-highlight{% endif %}">{{ day }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for slot in slots %}
+                        {% if not slot.is_lunch %}
+                        <tr class="slot-row">
+                            <td class="time-col text-center align-middle">
+                                <div class="fw-bold small">{{ slot.start }}</div>
+                                <div class="text-muted small">{{ slot.end }}</div>
+                            </td>
+                            {% for day in days %}
+                            <td class="day-col {% if day == today_name %}today-highlight{% endif %}">
+                                {% for entry in timetable %}
+                                {% if entry.day_of_week == day and entry.start_time.strftime('%H:%M') == slot.start %}
+                                <div class="session-block {% if day == today_name and current_slot and current_slot.id == slot.id %}is-current{% endif %}">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="badge bg-primary bg-opacity-10 text-primary" style="font-size: 0.6rem;">{{ entry.module.module_code }}</span>
+                                        {% if day == today_name and current_slot and current_slot.id == slot.id %}
+                                        <span class="text-success fw-bold" style="font-size: 0.6rem;"><i class="fas fa-circle me-1"></i>LIVE</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="fw-bold text-dark mb-1 truncate">{{ entry.module.module_name }}</div>
+                                    <div class="small text-muted"><i class="fas fa-users me-1"></i> {{ entry.batch.name if entry.batch else 'General' }}</div>
+                                    <div class="small text-primary mt-1"><i class="fas fa-map-marker-alt me-1"></i> {{ entry.venue or 'TBA' }}</div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% else %}
+                        <tr class="lunch-row text-center">
+                            <td class="time-col py-1 fw-bold">13:30</td>
+                            <td colspan="7" class="py-1">
+                                <i class="fas fa-utensils me-2"></i> LUNCH BREAK
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Original Session Cards View -->
+    <div class="tab-pane fade" id="pills-sessions" role="tabpanel">
+        <div class="row g-4">
+            {% for lecture in lectures %}
+            <div class="col-lg-6">
+                <!-- (Keep existing card design) -->
+                <div class="card card-premium h-100 position-relative">
+                    <div class="card-body p-4 pt-5">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-4">
+                                <i class="fas fa-chalkboard-teacher fs-3"></i>
+                            </div>
+                            <div>
+                                <span class="badge badge-premium bg-light text-primary mb-1">{{ lecture.module.module_code }}</span>
+                                <h5 class="fw-bold mb-0" style="color: var(--text-dark);">{{ lecture.lecture_title }}</h5>
+                            </div>
+                        </div>
+                        <div class="bg-light p-3 rounded-4 mb-4">
+                            <div class="row text-center g-2">
+                                <div class="col-6 border-end">
+                                    <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Schedule</small>
+                                    <span class="fw-bold small">{{ lecture.lecture_date.strftime('%d %b') }} • {{ lecture.start_time.strftime('%I:%M %p') }}</span>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Venue</small>
+                                    <span class="fw-bold small truncate d-block px-2 text-primary">{{ lecture.venue or 'TBA' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted">No scheduled sessions found.</p>
+            </div>
+            {% endfor %}
+        </div    </div>
+</div>
+{% endblock %}
+%}

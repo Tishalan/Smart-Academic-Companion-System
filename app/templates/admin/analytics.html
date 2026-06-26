@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}System Analytics - Admin{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">System Analytics</h2>
+        <p class="text-muted">Real-time overview of academic performance and institutional risk.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h5 class="fw-bold mb-4">Institutional Risk Distribution</h5>
+            <div style="height: 300px;">
+                <canvas id="riskDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h5 class="fw-bold mb-4">Quick Stats</h5>
+            <div class="d-flex flex-column gap-3">
+                <div class="p-3 bg-light rounded-4">
+                    <small class="text-muted d-block">Overall Dropout Risk</small>
+                    <h4 class="fw-bold mb-0 text-danger">12.4%</h4>
+                </div>
+                <div class="p-3 bg-light rounded-4">
+                    <small class="text-muted d-block">Average Attendance</small>
+                    <h4 class="fw-bold mb-0 text-success">88.5%</h4>
+                </div>
+                <div class="p-3 bg-light rounded-4">
+                    <small class="text-muted d-block">Graduation Confidence</small>
+                    <h4 class="fw-bold mb-0 text-primary">94.2%</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h5 class="fw-bold mb-4">Departmental Performance (Avg GPA)</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr class="text-muted">
+                            <th>Department</th>
+                            <th>Avg GPA</th>
+                            <th>Trend</th>
+                            <th class="text-end">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dept in dept_performance %}
+                        <tr>
+                            <td class="fw-bold">{{ dept.department }}</td>
+                            <td>{{ "%.2f"|format(dept.avg_gpa) }}</td>
+                            <td>
+                                <i class="fas fa-arrow-up text-success me-1"></i>
+                                <span class="small text-success">+ 0.2</span>
+                            </td>
+                            <td class="text-end">
+                                <span
+                                    class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Stable</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const ctx = document.getElementById('riskDistributionChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+            datasets: [{
+                data: [{{ risk_data.low }}, {{ risk_data.medium }}, {{ risk_data.high }}],
+        backgroundColor: ['#2ed573', '#ffa502', '#ff4757'],
+        borderWidth: 0
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+        cutout: '70%'
+    }
+    });
+</script>
+{% endblock %}

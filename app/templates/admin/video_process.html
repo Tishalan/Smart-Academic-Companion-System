@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}AI Video to PDF - Admin{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold mb-1">AI Video to PDF Notes</h2>
+                <p class="text-muted">Transform lecture videos into high-precision PDF study notes with AI.</p>
+            </div>
+            <div class="badge bg-primary bg-opacity-10 text-primary p-3 rounded-4">
+                <i class="fas fa-robot fs-4"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card card-premium overflow-hidden border-0 p-5 text-center position-relative">
+            <div class="premium-blob"></div>
+            
+            <div class="position-relative z-index-1">
+                <i class="fas fa-file-video fa-4x text-primary mb-4 animate__animated animate__pulse animate__infinite"></i>
+                <h4 class="fw-bold">Intelligent Video Processor</h4>
+                <p class="text-muted mb-5 px-5">Upload your video file (MP4/MKV). Our AI will extract audio, transcribe it, and generate professional study notes with perfect formatting.</p>
+
+                <form id="videoForm" action="{{ url_for('admin.process_video_notes') }}" method="POST" enctype="multipart/form-data">
+                    <div class="upload-zone p-4 bg-light rounded-4 border-2 border-dashed mb-4">
+                        <input type="file" name="video" id="videoInput" class="form-control border-0 bg-transparent" accept="video/*" required>
+                        <div class="mt-2 small text-muted">Maximum file size: 100MB</div>
+                    </div>
+
+                    <div class="mb-4 text-start">
+                        <div class="form-check form-switch p-3 bg-primary bg-opacity-10 rounded-4 border border-primary border-opacity-25">
+                            <input class="form-check-input ms-0 me-3" type="checkbox" name="deep_mode" id="deepModeToggle" checked>
+                            <label class="form-check-label fw-bold text-primary" for="deepModeToggle">
+                                <i class="fas fa-brain me-2"></i>Enable Deep AI Explanation & Self-Test Quiz
+                                <div class="small fw-normal text-muted mt-1">AI will research and expand every concept into a detailed study guide.</div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary-gradient w-100 rounded-pill py-3 shadow-lg" type="submit" id="submitBtn">
+                        <i class="fas fa-magic me-2"></i>Generate Structured PDF Notes
+                    </button>
+                </form>
+
+                <div id="processingStatus" class="d-none mt-5">
+                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+                    <h5 class="fw-bold">AI is at Work...</h5>
+                    <p class="text-muted">Extracting knowledge and formatting your PDF. This may take up to 2-3 minutes depending on video length.</p>
+                    
+                    <div class="progress mt-4 rounded-pill" style="height: 10px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary-gradient" role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if transcript_url %}
+        <div class="mt-5 animate__animated animate__fadeInUp">
+            <div class="card border-0 bg-success bg-opacity-10 rounded-4 p-4 shadow-sm">
+                <div class="d-flex align-items-center gap-4">
+                    <div class="bg-success text-white p-3 rounded-circle">
+                        <i class="fas fa-check fs-4"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold text-success mb-1">Deep Notes Generated Successfully!</h5>
+                        <p class="text-success text-opacity-75 mb-0">Your high-precision PDF is ready. (Processed using <b>Deep Research-Mode</b> with Academic Expansion).</p>
+                    </div>
+                    <a href="{{ transcript_url }}" class="btn btn-success rounded-pill px-5 py-3 shadow" download>
+                        <i class="fas fa-file-pdf me-2"></i>Download PDF Notes
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="mt-5">
+            <h6 class="fw-bold text-muted mb-3"><i class="fas fa-info-circle me-2"></i>Compliance & Formatting Details</h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="p-3 bg-white rounded-4 border small text-center">
+                        <div class="fw-bold mb-1">Times New Roman</div>
+                        <div class="text-muted">Standard Academic Font</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-white rounded-4 border small text-center">
+                        <div class="fw-bold mb-1">Justified & 1.5 Spacing</div>
+                        <div class="text-muted">Professional Layout</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-white rounded-4 border small text-center">
+                        <div class="fw-bold mb-1">Font 14 / 12</div>
+                        <div class="text-muted">Headings & Content</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .upload-zone {
+        transition: all 0.3s ease;
+        border: 2px dashed #e2e8f0;
+    }
+    .upload-zone:hover {
+        border-color: var(--primary-color);
+        background: rgba(102, 126, 234, 0.05) !important;
+    }
+    .premium-blob {
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .z-index-1 { z-index: 1; }
+</style>
+
+<script>
+    document.getElementById('videoForm').addEventListener('submit', function() {
+        document.getElementById('submitBtn').classList.add('d-none');
+        document.getElementById('processingStatus').classList.remove('d-none');
+        document.getElementById('videoInput').setAttribute('readonly', true);
+    });
+</script>
+{% endblock %}

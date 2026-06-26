@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}AI Study Assistant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-card {
+        border: 2px dashed rgba(0,0,0,0.1);
+        border-radius: 20px;
+        transition: all 0.3s;
+        background: #f8fafc;
+    }
+    .upload-card:hover {
+        background: #f1f5f9;
+        border-color: #3b82f6;
+    }
+    .aid-card {
+        border-radius: 15px;
+        transition: transform 0.2s;
+    }
+    .aid-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-5 align-items-center">
+    <div class="col-md-8">
+        <h2 class="fw-bold mb-1">AI Study Assistant</h2>
+        <p class="text-muted">Upload your lecture slides and let AI generate detailed, concept-rich study notes for you.</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <div class="badge bg-primary bg-opacity-10 text-primary p-2 px-3 rounded-pill">
+            <i class="fas fa-brain me-2"></i>Powered by Gemini AI
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Upload Section -->
+    <div class="col-lg-5">
+        <div class="card p-4 border-0 shadow-sm rounded-4">
+            <h5 class="fw-bold mb-4">New Study Aid Request</h5>
+            <form action="{{ url_for('student.study_aid') }}" method="POST" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Select Module</label>
+                    <select name="module_id" class="form-select rounded-3 p-3" required>
+                        <option value="">-- Choose Module --</option>
+                        {% for enrollment in enrollments %}
+                        <option value="{{ enrollment.module.id }}">{{ enrollment.module.module_code }} - {{ enrollment.module.module_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-4 text-center">
+                    <label class="form-label d-block text-start fw-bold">Upload Slides (PDF or PPTX)</label>
+                    <div class="upload-card p-5 mb-3">
+                        <i class="fas fa-file-upload fs-1 text-primary mb-3"></i>
+                        <input type="file" name="file" class="form-control" accept=".pdf,.pptx" required>
+                        <p class="small text-muted mt-2">Max file size: 16MB</p>
+                    </div>
+                </div>
+
+                <div class="mb-4 bg-primary bg-opacity-10 p-3 rounded-4">
+                    <div class="form-check form-switch d-flex justify-content-between align-items-center p-0">
+                        <label class="form-check-label fw-bold small text-primary" for="deepMode">
+                            <i class="fas fa-microscope me-2"></i>Enable Deep AI Research Mode
+                        </label>
+                        <input class="form-check-input ms-3" type="checkbox" name="deep_mode" id="deepMode" checked>
+                    </div>
+                    <p class="x-small text-primary opacity-75 mt-2 mb-0">Uses Wiki-Deep technology to research every concept in your slides for extreme detail.</p>
+                </div>
+
+                <button type="submit" class="btn btn-primary-gradient w-100 py-3 shadow-sm rounded-3">
+                    <i class="fas fa-magic me-2"></i>Generate AI Notes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- History Section -->
+    <div class="col-lg-7">
+        <div class="card p-4 border-0 shadow-sm rounded-4 h-100">
+            <h5 class="fw-bold mb-4">My AI Generated Notes</h5>
+            {% if aids %}
+            <div class="row g-3">
+                {% for aid in aids %}
+                <div class="col-md-6">
+                    <div class="card aid-card h-100 border p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="rounded-3 p-2 bg-light">
+                                <i class="fas {% if aid.original_filename.endswith('.pdf') %}fa-file-pdf text-danger{% else %}fa-file-powerpoint text-warning{% endif %} fs-4"></i>
+                            </div>
+                            <small class="text-muted">{{ aid.created_at.strftime('%d %b %Y') }}</small>
+                        </div>
+                        <h6 class="fw-bold mb-1 truncate">{{ aid.original_filename }}</h6>
+                        <p class="small text-muted mb-3">{{ aid.module.module_name }}</p>
+                        
+                        <a href="{{ url_for('static', filename=aid.pdf_report_path) }}" class="btn btn-sm btn-outline-primary rounded-pill w-100" target="_blank">
+                            <i class="fas fa-download me-2"></i>Download Detailed PDF
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div class="bg-light rounded-circle p-4 d-inline-block mb-3">
+                    <i class="fas fa-ghost fs-2 text-muted"></i>
+                </div>
+                <p class="text-muted">No AI notes generated yet. Upload your first slide deck!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- AI Process Indicator (Floating / Contextual) -->
+<div class="mt-5 p-4 bg-light rounded-4 border-start border-primary border-5">
+    <div class="d-flex gap-3">
+        <div class="text-primary fs-3">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div>
+            <h6 class="fw-bold mb-1">How it works</h6>
+            <p class="small text-muted mb-0">Our AI parses each slide in your presentation, identifies key academic concepts, and uses its external knowledge base to create detailed deep-dives. The resulting PDF acts as a comprehensive textbook tailored to YOUR class material.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Smart Academic{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <!-- Stats Cards -->
+    <div class="col-md-3">
+        <div class="card h-100 p-3">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                    <i class="fas fa-user-graduate text-primary fs-3"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-0">Total Students</h6>
+                    <h3 class="fw-bold mb-0">{{ stats.total_students }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 p-3">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                    <i class="fas fa-chalkboard-teacher text-success fs-3"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-0">Total Lecturers</h6>
+                    <h3 class="fw-bold mb-0">{{ stats.total_lecturers }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 p-3">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
+                    <i class="fas fa-book-open text-info fs-3"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-0">Courses</h6>
+                    <h3 class="fw-bold mb-0">{{ stats.total_courses }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 p-3">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-danger bg-opacity-10 p-3 me-3">
+                    <i class="fas fa-exclamation-triangle text-danger fs-3"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-0">High-Risk Students</h6>
+                    <h3 class="fw-bold mb-0">{{ stats.high_risk_count }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Risk Analytics -->
+    <div class="col-lg-8">
+        <div class="card h-100 p-4">
+            <h5 class="fw-bold mb-4">Risk Distribution Analytics</h5>
+            <canvas id="riskChart" height="150"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-lg-4">
+        <div class="card h-100 p-4">
+            <h5 class="fw-bold mb-4">Recent AI Predictions</h5>
+            <div class="list-group list-group-flush">
+                {% for pred in recent_predictions %}
+                <div class="list-group-item px-0 border-0 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-1 fw-bold">{{ pred.student.student_id if pred.student else 'Unknown' }}</h6>
+                        <span
+                            class="badge rounded-pill {% if pred.probability > 0.7 %}bg-danger{% elif pred.probability > 0.3 %}bg-warning{% else %}bg-success{% endif %}">
+                            {{ (pred.probability * 100)|int }}% Risk
+                        </span>
+                    </div>
+                    <small class="text-muted">{{ pred.prediction_type|capitalize }}: {{ pred.prediction_value }}</small>
+                    <div class="mt-2 small text-muted">
+                        <i class="far fa-clock me-1"></i> {{ pred.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted">No recent predictions found.</p>
+                {% endfor %}
+            </div>
+            <button class="btn btn-primary-gradient w-100 mt-3">View Full Report</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const ctx = document.getElementById('riskChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+            datasets: [{
+                label: 'Student Population',
+                data: [{{ risk_distribution.low }}, {{ risk_distribution.medium }}, {{ risk_distribution.high }}],
+        backgroundColor: ['#2ed573', '#ffa502', '#ff4757'],
+        borderRadius: 10,
+        barThickness: 50
+            }]
+        },
+        options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { beginAtZero: true, grid: { display: false } },
+            x: { grid: { display: false } }
+        }
+    }
+    });
+</script>
+{% endblock %}

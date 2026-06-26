@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Assignments & Submissions - Student{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">My Assignments</h2>
+        <p class="text-muted">View upcoming deadlines and manage your submissions.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <h5 class="fw-bold mb-4">Upcoming Assignments</h5>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-muted">
+                        <tr>
+                            <th class="ps-4">Title</th>
+                            <th>Module</th>
+                            <th>Deadline</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assignment in assignments %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold">{{ assignment.title }}</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary">{{ assignment.module.module_code }}</span>
+                                {% if assignment.brief_file_path %}
+                                <div class="mt-1">
+                                    <a href="{{ url_for('static', filename='uploads/' + assignment.brief_file_path) }}" class="btn btn-sm btn-outline-info rounded-pill py-0" download>
+                                        <i class="fas fa-download me-1"></i> Brief
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>{{ assignment.deadline.strftime('%d %b, %H:%M') if assignment.deadline else 'No Date' }}
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm rounded-3 px-3" data-bs-toggle="modal"
+                                    data-bs-target="#submitModal{{ assignment.id }}">
+                                    Submit Now
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Submit Modal -->
+                        <div class="modal fade" id="submitModal{{ assignment.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content border-0 rounded-4">
+                                    <div class="modal-header border-0">
+                                        <h5 class="modal-title fw-bold">Submit Assignment</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="text-muted small">Target: <strong>{{ assignment.title }}</strong></p>
+                                        <form action="{{ url_for('student.submissions') }}" method="POST"
+                                            enctype="multipart/form-data">
+                                            <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
+                                            <div class="mb-4 text-center p-5 border-2 border-dashed rounded-4 bg-light">
+                                                <i
+                                                    class="fas fa-cloud-upload-alt fa-3x text-primary opacity-50 mb-3"></i>
+                                                <h6>Upload your file</h6>
+                                                <input type="file" name="file" class="form-control" required>
+                                            </div>
+                                            <div class="modal-footer border-0 p-0">
+                                                <button type="submit"
+                                                    class="btn btn-primary-gradient w-100 rounded-3">Submit
+                                                    Assignment</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">No upcoming assignments.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        <h5 class="fw-bold mb-4">My Submissions</h5>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-muted">
+                        <tr>
+                            <th class="ps-4">Assignment</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">File</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for submission in submissions %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold">{{ submission.assignment.title }}</div>
+                                <small class="text-muted">{{ submission.assignment.module.module_name }}</small>
+                            </td>
+                            <td>{{ submission.submitted_at.strftime('%d %b, %Y') if submission.submitted_at else
+                                'N/A' }}</td>
+                            <td>
+                                {% if submission.status == 'released' or submission.is_released %}
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Released</span>
+                                {% elif submission.status == 'graded' %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3" title="Pending Admin Approval">Pending Approval</span>
+                                {% else %}
+                                <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3">Submitted</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <span class="text-muted small">{{ submission.file_path }}</span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">You haven't submitted anything yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

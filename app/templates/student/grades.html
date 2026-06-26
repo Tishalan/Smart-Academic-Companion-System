@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}My Grades - Student{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center text-md-start">
+        <h2 class="fw-bold">Academic Performance</h2>
+        <p class="text-muted">Track your progress and view detailed feedback on your assignments.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 text-center">
+            <h6 class="text-muted mb-2">Current GPA</h6>
+            <h2 class="fw-bold text-primary mb-0">{{ "%.2f"|format(student.GPA) }}</h2>
+            <div class="mt-2">
+                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Top 15%</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 text-center">
+            <h6 class="text-muted mb-2">Modules Completed</h6>
+            <h2 class="fw-bold mb-0">12</h2>
+            <div class="mt-2 text-muted small">Out of 40 required</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 text-center">
+            <h6 class="text-muted mb-2">Graduation Probability</h6>
+            <h2 class="fw-bold text-success mb-0">{{ (student.graduation_probability * 100)|round(1) }}%</h2>
+            <div class="mt-2 text-muted small">Based on ML insights</div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-white border-0 p-4">
+        <h5 class="fw-bold mb-0">Grades Summary</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-muted">
+                <tr>
+                    <th class="ps-4">Module</th>
+                    <th>Assignment</th>
+                    <th>Weight</th>
+                    <th>Date</th>
+                    <th>Grade</th>
+                    <th class="text-end pe-4">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for grade in grades %}
+                <tr>
+                    <td class="ps-4">
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary mb-1">
+                            {{ grade.assignment.module.module_code }}
+                        </span>
+                        <div class="small fw-bold text-dark">{{ grade.assignment.module.module_name }}</div>
+                    </td>
+                    <td>{{ grade.assignment.title }}</td>
+                    <td>{{ grade.assignment.weightage }}%</td>
+                    <td>{{ grade.submitted_at.strftime('%d %b, %Y') }}</td>
+                    <td>
+                        <div class="fw-bold text-primary">{{ grade.marks_obtained }} / {{ grade.assignment.total_marks
+                            }}</div>
+                        <span
+                            class="badge {% if grade.grade_category == 'Distinction' %}bg-success{% elif grade.grade_category == 'Merit' %}bg-info{% elif grade.grade_category == 'Pass' %}bg-primary{% else %}bg-danger{% endif %} bg-opacity-10 {% if grade.grade_category == 'Distinction' %}text-success{% elif grade.grade_category == 'Merit' %}text-info{% elif grade.grade_category == 'Pass' %}text-primary{% else %}text-danger{% endif %} rounded-pill px-2 small">
+                            {{ grade.grade_category }}
+                        </span>
+                    </td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-light rounded-3" data-bs-toggle="modal"
+                            data-bs-target="#feedbackModal{{ grade.id }}">
+                            <i class="far fa-comment-dots"></i> Feedback
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- Feedback Modal -->
+                <div class="modal fade" id="feedbackModal{{ grade.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content border-0 rounded-4">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title fw-bold">Lecturer Feedback</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted small mb-4">Feedback for {{ grade.assignment.title }}</p>
+                                <div class="bg-light p-4 rounded-4 mb-4">
+                                    <p class="mb-0 italic">"{{ grade.feedback or 'No feedback provided.' }}"</p>
+                                </div>
+                                <div class="d-flex align-items-center text-muted small">
+                                    <i class="fas fa-user-tie me-2"></i>
+                                    Graded by: {{ grade.grader.user.full_name if grade.grader else 'System' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">No graded assignments yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

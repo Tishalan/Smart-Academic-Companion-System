@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Timetable Management - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .slot-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+    .slot-card:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+    .slot-card.selected {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+        box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
+    }
+    .table-timetable th {
+        background: #f8f9fa;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        text-align: center;
+        padding: 15px;
+    }
+    .table-timetable td {
+        height: 100px;
+        vertical-align: middle;
+        padding: 10px;
+        min-width: 150px;
+    }
+    .timetable-entry {
+        background: white;
+        border-radius: 12px;
+        padding: 10px;
+        font-size: 0.8rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #667eea;
+        position: relative;
+    }
+    .delete-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .timetable-entry:hover .delete-btn {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Weekly Timetable Management</h2>
+        <p class="text-muted">Assign recurring module sessions to batches and lecturers.</p>
+    </div>
+    <button class="btn btn-primary-gradient px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#addEntryModal">
+        <i class="fas fa-plus me-2"></i>Assign New Slot
+    </button>
+</div>
+
+<div class="card card-premium overflow-hidden border-0">
+    <div class="table-responsive">
+        <table class="table table-bordered table-timetable mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 120px;">Time</th>
+                    {% for day in days %}
+                    <th>{{ day }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for slot in slots %}
+                {% if not slot.is_lunch %}
+                <tr>
+                    <td class="text-center">
+                        <span class="fw-bold d-block small">{{ slot.start }}</span>
+                        <span class="text-muted small">-</span>
+                        <span class="fw-bold d-block small">{{ slot.end }}</span>
+                    </td>
+                    {% for day in days %}
+                    <td>
+                        {% set found = false %}
+                        {% for entry in timetable %}
+                        {% if entry.day_of_week == day and entry.start_time.strftime('%H:%M') == slot.start %}
+                        <div class="timetable-entry">
+                            <form action="{{ url_for('admin.delete_timetable_entry', id=entry.id) }}" method="POST" class="delete-btn">
+                                <button type="submit" class="btn btn-sm text-danger p-0" onclick="return confirm('Delete this entry?')">
+                                    <i class="fas fa-times-circle"></i>
+                                </button>
+                            </form>
+                            <span class="badge bg-primary bg-opacity-10 text-primary mb-1">{{ entry.module.module_code }}</span>
+                            <div class="fw-bold text-dark truncate">{{ entry.module.module_name }}</div>
+                            <div class="small text-muted mb-1"><i class="fas fa-user-tie me-1"></i> {{ entry.lecturer.user.full_name if entry.lecturer else 'No Lecturer' }}</div>
+                            <div class="small text-muted"><i class="fas fa-users me-1"></i> {{ entry.batch.name if entry.batch else 'No Batch' }}</div>
+                            <div class="small text-primary mt-1"><i class="fas fa-map-marker-alt me-1"></i> {{ entry.venue or 'TBA' }}</div>
+                        </div>
+                        {% set found = true %}
+                        {% endif %}
+                        {% endfor %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% else %}
+                <tr class="bg-light bg-opacity-50">
+                    <td class="text-center text-muted small fw-bold py-2">Lunch</td>
+                    <td colspan="7" class="text-center text-muted small italic py-2">
+                        <i class="fas fa-utensils me-2"></i> Lunch Break (13:30 - 14:00)
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Entry Modal -->
+<div class="modal fade" id="addEntryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Assign Timetable Slot</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{{ url_for('admin.timetable') }}" method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Batch Selection</label>
+                            <select name="batch_id" class="form-select rounded-3 border-0 bg-light" required>
+                                <option value="" disabled selected>Select Batch</option>
+                                {% for batch in batches %}
+                                <option value="{{ batch.id }}">{{ batch.name }} ({{ batch.course.course_name }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Module</label>
+                            <select name="module_id" class="form-select rounded-3 border-0 bg-light" required>
+                                <option value="" disabled selected>Select Module</option>
+                                {% for module in modules %}
+                                <option value="{{ module.id }}">{{ module.module_code }} - {{ module.module_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Lecturer</label>
+                            <select name="lecturer_id" class="form-select rounded-3 border-0 bg-light" required>
+                                <option value="" disabled selected>Assign Lecturer</option>
+                                {% for lecturer in lecturers %}
+                                <option value="{{ lecturer.id }}">{{ lecturer.user.full_name }} ({{ lecturer.department }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Venue</label>
+                            <input type="text" name="venue" class="form-control rounded-3 border-0 bg-light" placeholder="e.g. Hall A, Lab 2, Zoom">
+                        </div>
+                    </div>
+                    <hr class="my-4 opacity-5">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold mb-3">Select Day & Time Slot</label>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <select name="day" class="form-select rounded-3 border-0 bg-light py-3 fw-bold" required>
+                                    <option value="" disabled selected>Select Day</option>
+                                    {% for day in days %}
+                                    <option value="{{ day }}">{{ day }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="row g-2">
+                                    {% for slot in slots %}
+                                    {% if not slot.is_lunch %}
+                                    <div class="col-6">
+                                        <input type="radio" class="btn-check" name="slot_id" id="slot-{{ slot.id }}" value="{{ slot.id }}" required>
+                                        <label class="btn btn-outline-primary w-100 rounded-3 py-2 small" for="slot-{{ slot.id }}">
+                                            {{ slot.label }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-0 mt-5">
+                        <button type="submit" class="btn btn-primary-gradient w-100 rounded-pill py-3 shadow">Create Allocation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

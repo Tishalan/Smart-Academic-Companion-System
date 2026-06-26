@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Performance Insights - Student{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">Performance Insights</h2>
+        <p class="text-muted">AI-driven analysis of your academic journey and predictions for the future.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <h5 class="fw-bold mb-4">Next Module Prediction</h5>
+            <div class="p-4 bg-primary bg-opacity-10 rounded-4 mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h4 class="fw-bold text-primary mb-2">Predicted Grade: A</h4>
+                        <p class="mb-0">Based on your current performance in prerequisite modules and attendance
+                            patterns, you are likely to excel in your upcoming core modules.</p>
+                    </div>
+                    <div class="col-md-4 text-center mt-3 mt-md-0">
+                        <div class="display-3 fw-bold text-primary">A</div>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-3">Strength Analysis</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="border rounded-4 p-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-success bg-opacity-10 text-success p-2 rounded-3 me-3">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h6 class="fw-bold mb-0">Attendance</h6>
+                        </div>
+                        <p class="small text-muted mb-0">Your {{ student.attendance_percentage }}% attendance is
+                            consistently above average.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="border rounded-4 p-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-info bg-opacity-10 text-info p-2 rounded-3 me-3">
+                                <i class="fas fa-search-plus"></i>
+                            </div>
+                            <h6 class="fw-bold mb-0">Digital Engagement</h6>
+                        </div>
+                        <p class="small text-muted mb-0">High forum participation and LMS login frequency show strong
+                            commitment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <h5 class="fw-bold mb-4">Risk Profile</h5>
+            <div class="text-center mb-4">
+                <div class="risk-meter mx-auto mb-3" style="width: 150px; height: 150px; position: relative;">
+                    <svg viewBox="0 0 100 100" class="w-100 h-100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#f1f2f6" stroke-width="8" />
+                        <circle cx="50" cy="50" r="45" fill="none"
+                            stroke="{% if student.risk_score < 0.3 %}#2ed573{% elif student.risk_score < 0.7 %}#ffa502{% else %}#ff4757{% endif %}"
+                            stroke-width="8" stroke-dasharray="{{ student.risk_score * 283 }} 283"
+                            transform="rotate(-90 50 50)" />
+                    </svg>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <h3 class="fw-bold mb-0">{{ (student.risk_score * 100)|round }}%</h3>
+                        <small class="text-muted">Risk</small>
+                    </div>
+                </div>
+                <h6
+                    class="fw-bold {% if student.risk_score < 0.3 %}text-success{% elif student.risk_score < 0.7 %}text-warning{% else %}text-danger{% endif %}">
+                    {% if student.risk_score < 0.3 %}Low Risk{% elif student.risk_score < 0.7 %}Medium Risk{% else
+                        %}High Risk{% endif %} </h6>
+            </div>
+            <hr>
+            <h6 class="fw-bold mb-3">Recommendations</h6>
+            <ul class="list-unstyled small text-muted d-flex flex-column gap-2">
+                <li><i class="fas fa-lightbulb text-warning me-2"></i>Maintain your study hours above 6h/week.</li>
+                <li><i class="fas fa-lightbulb text-warning me-2"></i>Review Week 8 quiz materials for Module CS101.
+                </li>
+                <li><i class="fas fa-lightbulb text-warning me-2"></i>Continue engaging in the student forums.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

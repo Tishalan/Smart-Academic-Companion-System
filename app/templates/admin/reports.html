@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Academic Reports - Admin{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">Academic Reports</h2>
+        <p class="text-muted">Generate and download institutional performance and risk reports.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                style="width: 70px; height: 70px;">
+                <i class="fas fa-exclamation-triangle fs-2"></i>
+            </div>
+            <h5 class="fw-bold">Risk Assessment Report</h5>
+            <p class="text-muted small mb-4">Detailed analysis of students at high risk of dropout with ML feature
+                importance.</p>
+            <a href="{{ url_for('admin.download_report', type='risk') }}"
+                class="btn btn-outline-primary w-100 rounded-3">
+                <i class="fas fa-download me-2"></i>Download PDF
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100">
+            <div class="bg-success bg-opacity-10 text-success rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                style="width: 70px; height: 70px;">
+                <i class="fas fa-chart-bar fs-2"></i>
+            </div>
+            <h5 class="fw-bold">Performance Summary</h5>
+            <p class="text-muted small mb-4">Institutional GPA distribution, course pass rates, and
+                semester-over-semester trends.</p>
+            <button class="btn btn-outline-success w-100 rounded-3" disabled>
+                <i class="fas fa-download me-2"></i>Download PDF
+            </button>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100">
+            <div class="bg-info bg-opacity-10 text-info rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                style="width: 70px; height: 70px;">
+                <i class="fas fa-user-check fs-2"></i>
+            </div>
+            <h5 class="fw-bold">Attendance Record</h5>
+            <p class="text-muted small mb-4">Comprehensive attendance data aggregated by department, module, and level.
+            </p>
+            <button class="btn btn-outline-info w-100 rounded-3" disabled>
+                <i class="fas fa-download me-2"></i>Download PDF
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

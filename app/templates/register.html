@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Smart Academic{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-6 col-lg-5">
+        <div class="card p-4 border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 70px; height: 70px;">
+                        <i class="fas fa-user-plus text-success fs-2"></i>
+                    </div>
+                    <h2 class="fw-bold mb-1">Join the Platform</h2>
+                    <p class="text-muted">Create your academic companion account</p>
+                </div>
+
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3 text-start">
+                                <input type="text" class="form-control rounded-3" id="full_name" name="full_name"
+                                    placeholder="Full Name" required>
+                                <label for="full_name">Full Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3 text-start">
+                                <input type="text" class="form-control rounded-3" id="username" name="username"
+                                    placeholder="Username" required>
+                                <label for="username">Username</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3 text-start">
+                        <input type="email" class="form-control rounded-3" id="email" name="email"
+                            placeholder="name@example.com" required>
+                        <label for="email">Email Address</label>
+                    </div>
+
+                    <div class="form-floating mb-3 text-start">
+                        <input type="password" class="form-control rounded-3" id="password" name="password"
+                            placeholder="Password" required>
+                        <label for="password">Password</label>
+                    </div>
+
+                    <div class="form-floating mb-4 text-start">
+                        <select class="form-select rounded-3" id="role" name="role" required>
+                            <option value="student">Student</option>
+                            <option value="lecturer">Lecturer</option>
+                        </select>
+                        <label for="role">Register as</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-gradient w-100 py-3 mb-3 shadow">
+                        Create Account
+                    </button>
+
+                    <p class="text-muted mb-0">Already have an account? <a href="{{ url_for('auth.login') }}"
+                            class="text-primary text-decoration-none fw-semibold">Login here</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

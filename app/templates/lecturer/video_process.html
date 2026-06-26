@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}AI Video Transcript - Lecturer{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">AI Video Transcript</h2>
+        <p class="text-muted">Upload lecture videos to automatically generate AI transcripts and PDF summaries.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card border-0 shadow-lg rounded-4 p-5 text-center bg-white">
+            <div class="mb-4">
+                <i class="fas fa-video fa-4x text-primary-gradient opacity-75"></i>
+            </div>
+            <h3 class="fw-bold">AI Lecture-to-Notes</h3>
+            <p class="text-muted mb-4 px-lg-5">Transform your video recordings into professional, formatted study notes in seconds. Optimized for academic precision.</p>
+
+            <form id="videoForm" action="{{ url_for('lecturer.process_video') }}" method="POST" enctype="multipart/form-data">
+                <div class="upload-zone p-4 bg-light rounded-4 border-2 border-dashed mb-4 transition-all">
+                    <input type="file" name="video" id="videoInput" class="form-control border-0 bg-transparent" accept="video/*" required>
+                    <div class="mt-2 small text-muted">Maximum file size: 100MB | Supported: MP4, MKV</div>
+                </div>
+
+                <div class="mb-4 text-start">
+                    <div class="form-check form-switch p-3 bg-primary bg-opacity-10 rounded-4 border border-primary border-opacity-25">
+                        <input class="form-check-input ms-0 me-3" type="checkbox" name="deep_mode" id="deepModeToggle" checked>
+                        <label class="form-check-label fw-bold text-primary" for="deepModeToggle">
+                            <i class="fas fa-brain me-2"></i>Enable Deep AI Explanation & Self-Test Quiz
+                            <div class="small fw-normal text-muted mt-1">Research-Mode: AI will research academic terms to provide extra depth.</div>
+                        </label>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary-gradient w-100 rounded-pill py-3 shadow-lg" type="submit" id="submitBtn">
+                    <i class="fas fa-magic me-2"></i>Generate PDF Notes
+                </button>
+            </form>
+
+            <div id="processingStatus" class="mt-4 d-none">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h6 class="fw-bold">AI Scribe is working...</h6>
+                <p class="text-muted small">Generating transcript, searching academic databases, and formatting your PDF.</p>
+            </div>
+        </div>
+
+        {% if transcript_url %}
+        <div class="mt-5 animate__animated animate__fadeInUp">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="bg-success bg-opacity-10 p-4 border-bottom border-success border-opacity-25 d-flex align-items-center">
+                    <div class="p-3 bg-success rounded-circle text-white me-4">
+                        <i class="fas fa-check fs-4"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold text-success mb-1">Study Guide Generated Successfully!</h5>
+                        <p class="text-success text-opacity-75 mb-0">High-precision PDF with Deep Research and Quiz is ready.</p>
+                    </div>
+                    <a href="{{ transcript_url }}" class="btn btn-success rounded-pill px-5 py-3 shadow" download>
+                        <i class="fas fa-file-pdf me-2"></i>Download PDF
+                    </a>
+                </div>
+                
+                <div class="p-5 bg-white">
+                    <h5 class="fw-bold mb-4"><i class="fas fa-paper-plane text-primary me-2"></i>Share with Student Batch</h5>
+                    <p class="text-muted small mb-4">Select the target Batch and Module to distribute these notes directly to students' dashboards.</p>
+                    
+                    <form action="{{ url_for('lecturer.share_ai_notes') }}" method="POST" class="row g-3">
+                        <input type="hidden" name="file_path" value="{{ raw_pdf_path }}">
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">Select Assignment Slot (From My Timetable)</label>
+                            <select name="assignment_selector" id="assignmentSelector" class="form-select rounded-3 p-3 shadow-sm border-0 bg-light" required>
+                                <option value="">-- Choose a Module & Batch --</option>
+                                {% for item in assignments %}
+                                <option value="{{ item.module_id }}|{{ item.batch_id }}">
+                                    {{ item.module_name }} ({{ item.batch_name }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" name="module_id" id="hiddenModuleId">
+                            <input type="hidden" name="batch_id" id="hiddenBatchId">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">Note Title for Students</label>
+                            <input type="text" name="title" class="form-control rounded-3 p-3 shadow-sm border-0 bg-light" placeholder="e.g. Introduction to AI - Lecture Notes" required>
+                        </div>
+                        <div class="col-12 mt-4 text-center">
+                            <button type="submit" class="btn btn-primary-gradient px-5 py-3 rounded-pill shadow-lg">
+                                <i class="fas fa-share-alt me-2"></i>Distribute to Batch Now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('videoForm').addEventListener('submit', function() {
+        document.getElementById('submitBtn').classList.add('disabled');
+        document.getElementById('processingStatus').classList.remove('d-none');
+    });
+
+    // Handle selection split
+    const selector = document.getElementById('assignmentSelector');
+    if (selector) {
+        selector.addEventListener('change', function() {
+            const [mid, bid] = this.value.split('|');
+            document.getElementById('hiddenModuleId').value = mid || '';
+            document.getElementById('hiddenBatchId').value = bid || '';
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - Admin{% endblock %}
+
+{% block content %}
+<!-- Page Header & Action Buttons -->
+<div class="row align-items-center mb-4">
+    <div class="col-lg-4">
+        <h2 class="fw-bold mb-0">User Management</h2>
+        <p class="text-muted small mb-0">Manage {{ pagination.total }} total records in the system</p>
+    </div>
+    <div class="col-lg-5">
+        <form action="{{ url_for('admin.users') }}" method="GET" class="position-relative">
+            <input type="hidden" name="role" value="{{ role_filter or '' }}">
+            <input type="text" name="search" class="form-control rounded-pill ps-4 border-0 shadow-sm" 
+                   placeholder="Search within {{ role_filter or 'all users' }}..." value="{{ search }}">
+            <button type="submit" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-2 text-primary">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+    <div class="col-lg-3 text-lg-end mt-3 mt-lg-0">
+        <button class="btn btn-primary-gradient px-4 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="fas fa-plus me-2"></i>Add User
+        </button>
+    </div>
+</div>
+
+<!-- Role Filter Tabs -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-2 bg-white d-inline-flex">
+            <div class="nav nav-pills border-0">
+                <a class="nav-link rounded-pill px-4 {% if not role_filter %}active text-white{% else %}text-muted{% endif %}" 
+                   href="{{ url_for('admin.users', search=search) }}">
+                    <i class="fas fa-users me-2"></i>All Members
+                </a>
+                <a class="nav-link rounded-pill px-4 ms-2 {% if role_filter == 'student' %}active text-white{% else %}text-muted{% endif %}" 
+                   href="{{ url_for('admin.users', role='student', search=search) }}">
+                    <i class="fas fa-user-graduate me-2"></i>Students
+                </a>
+                <a class="nav-link rounded-pill px-4 ms-2 {% if role_filter == 'lecturer' %}active text-white{% else %}text-muted{% endif %}" 
+                   href="{{ url_for('admin.users', role='lecturer', search=search) }}">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Lecturers
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Table Card -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">Name & Email</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Profile ID</th>
+                    <th>Dept</th>
+                    <th class="text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-sm bg-primary bg-opacity-10 text-primary rounded-circle me-3 d-flex align-items-center justify-content-center">
+                                <span class="fw-bold">{{ user.full_name[0] | upper }}</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ user.full_name }}</h6>
+                                <small class="text-muted">{{ user.email }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge bg-light text-dark fw-normal">{{ user.username }}</span></td>
+                    <td>
+                        <span class="badge {% if user.role == 'admin' %}bg-danger{% elif user.role == 'lecturer' %}bg-info{% else %}bg-primary{% endif %} bg-opacity-10 {% if user.role == 'admin' %}text-danger{% elif user.role == 'lecturer' %}text-info{% else %}text-primary{% endif %} rounded-pill px-3">
+                            {{ user.role | capitalize }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if user.role == 'student' %}
+                        {{ user.student_profile.student_id if user.student_profile else 'N/A' }}
+                        {% elif user.role == 'lecturer' %}
+                        {{ user.lecturer_profile.lecturer_id if user.lecturer_profile else 'N/A' }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.role == 'student' %}
+                        {{ user.student_profile.department if user.student_profile else '-' }}
+                        {% elif user.role == 'lecturer' %}
+                        {{ user.lecturer_profile.department if user.lecturer_profile else '-' }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-4">
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-primary rounded-3 me-2 edit-user-btn" 
+                                    data-user-id="{{ user.id }}" title="Edit User">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <form action="{{ url_for('admin.delete_user', id=user.id) }}" method="POST"
+                                onsubmit="return confirm('Are you sure you want to delete this user?');" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-3" title="Delete User">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <div class="text-muted">
+                            <i class="fas fa-user-slash fa-3x mb-3 opacity-25"></i>
+                            <p>No users found matching your criteria.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if pagination.pages > 1 %}
+    <div class="card-footer bg-white border-0 py-3">
+        <nav aria-label="User navigation">
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+                <!-- Previous Button -->
+                <li class="page-item {{ 'disabled' if not pagination.has_prev }}">
+                    <a class="page-link rounded-start" href="{{ url_for('admin.users', page=pagination.prev_num, search=search, role=role_filter) if pagination.has_prev else '#' }}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+
+                <!-- Page Numbers -->
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        <li class="page-item {{ 'active' if page_num == pagination.page }}">
+                            <a class="page-link" href="{{ url_for('admin.users', page=page_num, search=search, role=role_filter) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Next Button -->
+                <li class="page-item {{ 'disabled' if not pagination.has_next }}">
+                    <a class="page-link rounded-end" href="{{ url_for('admin.users', page=pagination.next_num, search=search, role=role_filter) if pagination.has_next else '#' }}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div class="text-center mt-2">
+            <small class="text-muted">Showing page {{ pagination.page }} of {{ pagination.pages }}</small>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- SINGLE DYNAMIC EDIT MODAL -->
+<div class="modal fade" id="dynamicEditModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Edit User Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-3">
+                <form id="editUserForm" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Full Name</label>
+                        <input type="text" name="full_name" id="edit_full_name" class="form-control rounded-3" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Email Address</label>
+                        <input type="email" name="email" id="edit_email" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Role</label>
+                            <select name="role" id="edit_role" class="form-select rounded-3">
+                                <option value="student">Student</option>
+                                <option value="lecturer">Lecturer</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Profile ID</label>
+                            <input type="text" name="p_id" id="edit_p_id" class="form-control rounded-3">
+                        </div>
+                    </div>
+
+                    <div id="editExtraFields">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold">Department</label>
+                                <input type="text" name="department" id="edit_department" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-6 mb-3" id="editGenderField">
+                                <label class="form-label small fw-bold">Gender</label>
+                                <select name="gender" id="edit_gender" class="form-select rounded-3">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3" id="editCourseFieldWrapper">
+                            <label class="form-label small fw-bold">Assign Course</label>
+                            <select name="course_id" id="edit_course_id" class="form-select rounded-3">
+                                <option value="">Select Course</option>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.course_name }} ({{ course.course_code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-0 p-0 mt-4">
+                        <button type="submit" class="btn btn-primary-gradient w-100 rounded-pill py-2">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal (Keep as is but clean up) -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 rounded-4">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Add New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('admin.users') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Full Name</label>
+                        <input type="text" name="full_name" class="form-control rounded-3" placeholder="John Doe" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Username</label>
+                        <input type="text" name="username" class="form-control rounded-3" placeholder="johndoe" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Email Address</label>
+                        <input type="email" name="email" class="form-control rounded-3" placeholder="john@example.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Password</label>
+                        <input type="password" name="password" class="form-control rounded-3" placeholder="••••••••" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Role</label>
+                            <select name="role" class="form-select rounded-3" id="roleSelect">
+                                <option value="student">Student</option>
+                                <option value="lecturer">Lecturer</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">Profile ID</label>
+                            <input type="text" name="p_id" class="form-control rounded-3" placeholder="ID Number">
+                        </div>
+                    </div>
+                    <div id="extraFields">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold">Department</label>
+                                <input type="text" name="department" class="form-control rounded-3" placeholder="Computing">
+                            </div>
+                            <div class="col-md-6 mb-3" id="genderField">
+                                <label class="form-label small fw-bold">Gender</label>
+                                <select name="gender" class="form-select rounded-3">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3" id="courseField">
+                            <label class="form-label small fw-bold">Assign Course</label>
+                            <select name="course_id" class="form-select rounded-3">
+                                <option value="">Select Course</option>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.course_name }} ({{ course.course_code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-0 mt-4">
+                        <button type="submit" class="btn btn-primary-gradient w-100 rounded-pill py-2">Create Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const editButtons = document.querySelectorAll('.edit-user-btn');
+        const editModal = new bootstrap.Modal(document.getElementById('dynamicEditModal'));
+        const editForm = document.getElementById('editUserForm');
+        
+        const roleSelect = document.getElementById('roleSelect');
+        const editRoleSelect = document.getElementById('edit_role');
+
+        // Toggle fields function
+        function toggleFields(role, extraId, genderId, courseId) {
+            const extra = document.getElementById(extraId);
+            const gender = document.getElementById(genderId);
+            const course = document.getElementById(courseId);
+            
+            if (role === 'admin') {
+                extra.style.display = 'none';
+            } else {
+                extra.style.display = 'block';
+                gender.style.display = role === 'student' ? 'block' : 'none';
+                if (course) course.style.display = role === 'student' ? 'block' : 'none';
+            }
+        }
+
+        // Add user role toggle
+        roleSelect.addEventListener('change', function() {
+            toggleFields(this.value, 'extraFields', 'genderField', 'courseField');
+        });
+
+        // Edit user role toggle
+        editRoleSelect.addEventListener('change', function() {
+            toggleFields(this.value, 'editExtraFields', 'editGenderField', 'editCourseFieldWrapper');
+        });
+
+        // Edit button click handler
+        editButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                
+                // Set form action
+                editForm.action = `/admin/users/edit/${userId}`;
+                
+                // Fetch user data
+                fetch(`/admin/users/data/${userId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('edit_full_name').value = data.full_name;
+                        document.getElementById('edit_email').value = data.email;
+                        document.getElementById('edit_role').value = data.role;
+                        document.getElementById('edit_p_id').value = data.p_id;
+                        document.getElementById('edit_department').value = data.department;
+                        document.getElementById('edit_gender').value = data.gender || 'Other';
+                        document.getElementById('edit_course_id').value = data.course_id || '';
+                        
+                        // Set visibility
+                        toggleFields(data.role, 'editExtraFields', 'editGenderField', 'editCourseFieldWrapper');
+                        
+                        editModal.show();
+                    })
+                    .catch(err => {
+                        console.error('Error fetching user data:', err);
+                        alert('Error loading user data. Please try again.');
+                    });
+            });
+        });
+    });
+</script>
+
+<style>
+    .avatar-sm { width: 40px; height: 40px; }
+    .pagination .page-link { border: none; margin: 0 2px; color: #6c757d; }
+    .pagination .page-item.active .page-link { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border-radius: 8px; }
+    .btn-primary-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border: none; }
+    .btn-primary-gradient:hover { opacity: 0.9; color: white; }
+</style>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Modules - Lecturer{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold mb-1">Module Portfolio</h2>
+        <p class="text-muted">High-level overview of your assigned teaching modules.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for module in modules %}
+    <div class="col-md-6 col-xl-4">
+        <div class="card card-premium h-100 overflow-hidden">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <span class="badge badge-premium bg-primary bg-opacity-10 text-primary">{{ module.module_code }}</span>
+                    <div class="dropdown">
+                        <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                            <li><a class="dropdown-item py-2" href="#"><i class="fas fa-users-cog me-2"></i>Enrollment Management</a></li>
+                            <li><a class="dropdown-item py-2" href="#"><i class="fas fa-file-export me-2"></i>Export Gradebook</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h5 class="fw-bold mb-4" style="color: var(--text-dark); min-height: 2.4em;">{{ module.module_name }}</h5>
+                
+                <div class="row g-2 mb-4">
+                    <div class="col-6">
+                        <div class="bg-light p-3 rounded-4 border-1 border">
+                            <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.05em;">Course Capacity</small>
+                            <span class="fw-bold text-dark">{{ module.enrollments.count() }} Students</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-light p-3 rounded-4 border-1 border">
+                            <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.05em;">Academic Period</small>
+                            <span class="fw-bold text-dark">Semester {{ module.semester }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('lecturer.assignments', module_id=module.id) }}"
+                        class="btn btn-primary-gradient rounded-pill py-2 shadow-sm fw-bold">
+                        <i class="fas fa-tasks me-2"></i>Manage Assessments
+                    </a>
+                    <a href="{{ url_for('lecturer.performance', module_id=module.id) }}"
+                        class="btn btn-white border rounded-pill py-2 shadow-sm fw-bold text-muted">
+                        <i class="fas fa-analytics me-2"></i>Analytical Insights
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="bg-light d-inline-block p-4 rounded-circle mb-3">
+            <i class="fas fa-graduation-cap fa-3x text-muted opacity-25"></i>
+        </div>
+        <h5 class="text-muted fw-bold">Assignment Pending</h5>
+        <p class="text-muted small">You haven't been assigned any modules for the current semester.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

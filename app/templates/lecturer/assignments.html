@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Assignments - Lecturer{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Assignment Hub</h2>
+        <p class="text-muted">Create and manage assessments for your modules.</p>
+    </div>
+    <button class="btn btn-primary-gradient px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#createAssignmentModal">
+        <i class="fas fa-plus me-2"></i>New Assignment
+    </button>
+</div>
+
+<div class="row g-4">
+    {% for assignment in assignments %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card card-premium h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <span class="badge badge-premium bg-primary bg-opacity-10 text-primary">{{ assignment.module.module_code }}</span>
+                    <div class="dropdown">
+                        <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                            <li><a class="dropdown-item py-2" href="#"><i class="fas fa-edit me-2"></i>Edit Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item py-2 text-danger" href="#"><i class="fas fa-trash-alt me-2"></i>Delete</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: var(--text-dark);">{{ assignment.title }}</h5>
+                <p class="text-muted small mb-4 line-clamp-3" style="min-height: 4.5em;">{{ assignment.description or 'No description provided.' }}</p>
+
+                <div class="d-flex flex-column gap-2 text-muted small mt-auto">
+                    <div class="d-flex align-items-center">
+                        <i class="far fa-calendar-alt me-2 text-primary"></i>
+                        <span class="fw-bold">Due: {{ assignment.deadline.strftime('%d %b, %H:%M') if assignment.deadline else 'No Date' }}</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-users me-2 text-success"></i>
+                        <span class="fw-bold">{{ assignment.submissions.count() }} Submissions</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                <a href="{{ url_for('lecturer.grading') }}" class="btn btn-sm btn-outline-primary w-100 rounded-pill py-2 shadow-sm fw-bold">
+                    <i class="fas fa-check-double me-2"></i>Grade Submissions
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="bg-light d-inline-block p-4 rounded-circle mb-3">
+            <i class="fas fa-tasks fa-3x text-muted opacity-25"></i>
+        </div>
+        <h5 class="text-muted fw-bold">No assignments yet.</h5>
+        <p class="text-muted small">Launch your first module assessment above.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Create Assignment Modal -->
+<div class="modal fade" id="createAssignmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Create New Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{{ url_for('lecturer.assignments') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Target Module</label>
+                        <select name="module_id" class="form-select rounded-3 border-0 bg-light" required>
+                            {% for module in modules %}
+                            <option value="{{ module.id }}">{{ module.module_code }} - {{ module.module_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Assignment Title</label>
+                        <input type="text" name="title" class="form-control rounded-3 border-0 bg-light" placeholder="e.g. Mid-term Research Report" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Submission Deadline</label>
+                        <input type="datetime-local" name="due_date" class="form-control rounded-3 border-0 bg-light" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Detailed Description</label>
+                        <textarea name="description" class="form-control rounded-3 border-0 bg-light" rows="4" placeholder="Outline the requirements and learning outcomes..."></textarea>
+                    </div>
+                    <div class="modal-footer border-0 p-0 mt-4">
+                        <button type="submit" class="btn btn-primary-gradient w-100 rounded-pill py-3 shadow">
+                            <i class="fas fa-rocket me-2"></i>Publish Assignment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

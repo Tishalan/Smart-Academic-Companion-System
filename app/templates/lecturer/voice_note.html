@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Voice Notes - Lecturer{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">AI Voice-to-Text</h2>
+        <p class="text-muted">Convert lecture recordings or voice notes into digital text summaries.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4 text-center">
+                <div class="bg-primary bg-opacity-10 text-primary p-4 rounded-circle d-inline-block mb-4">
+                    <i class="fas fa-microphone fs-1"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Upload Audio File</h4>
+                <p class="text-muted mb-4 small">Supported formats: MP3, WAV, M4A. Max size: 50MB.</p>
+
+                <form action="{{ url_for('lecturer.process_voice') }}" method="POST" enctype="multipart/form-data">
+                    <div class="mb-4 text-start">
+                        <input type="file" name="audio" class="form-control rounded-3" accept=".mp3,.wav,.m4a" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary-gradient w-100 rounded-pill py-3">
+                        <i class="fas fa-magic me-2"></i>Generate Transcript
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-4">Transcription Result</h5>
+                {% if transcript %}
+                <div class="bg-light p-4 rounded-4 position-relative">
+                    <button class="btn btn-sm btn-link position-absolute top-0 end-0 m-3 text-muted"
+                        onclick="copyText()">
+                        <i class="far fa-copy"></i>
+                    </button>
+                    <p id="transcriptText" class="mb-0 overflow-auto" style="max-height: 400px; white-space: pre-wrap;">
+                        {{ transcript }}</p>
+                </div>
+                <div class="mt-4 d-flex gap-2">
+                    <button class="btn btn-outline-primary rounded-pill px-4 flex-grow-1">Save to Modules</button>
+                    <button class="btn btn-outline-secondary rounded-pill px-4 flex-grow-1">Download PDF</button>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-file-alt fa-3x text-muted opacity-25 mb-3"></i>
+                    <p class="text-muted mb-0">No transcript available. Upload an audio file to begin.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyText() {
+        const text = document.getElementById('transcriptText').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Transcript copied to clipboard!');
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}5.4.3 Model Development - Smart Academic{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-12">
+        <div
+            class="card bg-primary-gradient text-white p-5 border-0 rounded-4 shadow-lg overflow-hidden position-relative">
+            <div class="position-relative z-1">
+                <h1 class="display-4 fw-bold mb-2">5.4.3 Model Development</h1>
+                <p class="lead opacity-75">Integrated Comparative Analysis of Predictive Algorithms</p>
+                <div class="mt-4">
+                    <span class="badge bg-white text-primary px-3 py-2 rounded-pill fw-bold">XGBoost Optimized</span>
+                    <span class="badge bg-white bg-opacity-25 text-white px-3 py-2 rounded-pill ms-2">Random
+                        Forest</span>
+                    <span class="badge bg-white bg-opacity-25 text-white px-3 py-2 rounded-pill ms-2">Logistic
+                        Regression</span>
+                </div>
+            </div>
+            <!-- Decorative circle -->
+            <div class="position-absolute end-0 bottom-0 mb-n5 me-n5 opacity-25"
+                style="width: 300px; height: 300px; background: white; border-radius: 50%;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-lg-4">
+        <div class="card h-100 p-4 border-0 shadow-sm rounded-4">
+            <div class="mb-3 text-primary">
+                <i class="fas fa-chart-line fa-2x"></i>
+            </div>
+            <h5 class="fw-bold">Baseline Model</h5>
+            <h6 class="text-muted mb-3">Logistic Regression</h6>
+            <p class="text-secondary small">
+                Logistic Regression serves as our baseline. It is a linear model that outputs probabilities using a
+                sigmoid function. It excels when features have a linear relationship with the target logging simple,
+                interpretable decision boundaries.
+            </p>
+            {% if metrics['Logistic Regression'] %}
+            <div class="mt-auto pt-3 border-top">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small text-muted">Accuracy</span>
+                    <span class="fw-bold">{{ (metrics['Logistic Regression'].accuracy * 100)|round(2) }}%</span>
+                </div>
+                <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-primary"
+                        style="width: {{ metrics['Logistic Regression'].accuracy * 100 }}%"></div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100 p-4 border-0 shadow-sm rounded-4">
+            <div class="mb-3 text-success">
+                <i class="fas fa-tree fa-2x"></i>
+            </div>
+            <h5 class="fw-bold">Ensemble Model</h5>
+            <h6 class="text-muted mb-3">Random Forest</h6>
+            <p class="text-secondary small">
+                Random Forest is an ensemble of decision trees trained via the bagging method. By averaging predictions
+                from multiple uncorrelated trees, it significantly reduces overfitting and captures complex non-linear
+                patterns in student behavior.
+            </p>
+            {% if metrics['Random Forest'] %}
+            <div class="mt-auto pt-3 border-top">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small text-muted">Accuracy</span>
+                    <span class="fw-bold">{{ (metrics['Random Forest'].accuracy * 100)|round(2) }}%</span>
+                </div>
+                <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-success" style="width: {{ metrics['Random Forest'].accuracy * 100 }}%">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100 p-4 border-0 shadow-sm rounded-4 bg-light">
+            <div class="mb-3 text-info">
+                <i class="fas fa-rocket fa-2x"></i>
+            </div>
+            <h5 class="fw-bold">Boosting Model</h5>
+            <h6 class="text-muted mb-3">XGBoost (Selected)</h6>
+            <p class="text-secondary small">
+                eXtreme Gradient Boosting (XGBoost) utilizes gradient boosting framework. It builds trees sequentially,
+                where each new tree corrects errors from previous ones. It includes L1/L2 regularization to prevent
+                overfitting.
+            </p>
+            {% if metrics['XGBoost'] %}
+            <div class="mt-auto pt-3 border-top">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small text-muted">Accuracy</span>
+                    <span class="fw-bold">{{ (metrics['XGBoost'].accuracy * 100)|round(2) }}%</span>
+                </div>
+                <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-info" style="width: {{ metrics['XGBoost'].accuracy * 100 }}%"></div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-lg-8">
+        <div class="card p-4 border-0 shadow-sm rounded-4 h-100">
+            <h5 class="fw-bold mb-4">Why XGBoost was Selected</h5>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="d-flex gap-3">
+                        <div class="icon-box bg-primary bg-opacity-10 text-primary p-3 rounded-3"
+                            style="height: fit-content;">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold">Superior Accuracy</h6>
+                            <p class="small text-muted">Optimizes loss functions directly for complex student data
+                                patterns.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-3">
+                        <div class="icon-box bg-success bg-opacity-10 text-success p-3 rounded-3"
+                            style="height: fit-content;">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold">Regularization</h6>
+                            <p class="small text-muted">L1/L2 regularization prevents overfitting on localized student
+                                clusters.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mt-5 mb-4">5.4.4 Evaluation Metrics</h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="p-2 border rounded-3">
+                        <small class="fw-bold text-primary d-block">Accuracy</small>
+                        <p style="font-size: 0.75rem;" class="mb-0 text-muted">Overall correctness. Used for high-level
+                            selection.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 border rounded-3">
+                        <small class="fw-bold text-success d-block">Precision</small>
+                        <p style="font-size: 0.75rem;" class="mb-0 text-muted">Correct positive ratio. Used to avoid
+                            false alarms.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 border rounded-3">
+                        <small class="fw-bold text-warning d-block">Recall</small>
+                        <p style="font-size: 0.75rem;" class="mb-0 text-muted">Sensitivity. Used to find all at-risk
+                            students.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 border rounded-3">
+                        <small class="fw-bold text-info d-block">F1-Score</small>
+                        <p style="font-size: 0.75rem;" class="mb-0 text-muted">Harmonic balance for imbalanced data.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 border rounded-3">
+                        <small class="fw-bold text-danger d-block">ROC-AUC</small>
+                        <p style="font-size: 0.75rem;" class="mb-0 text-muted">Class distinction ability. Measures
+                            probability calibration.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 border rounded-3">
+                        <small class="fw-bold text-dark d-block">Confusion Matrix</small>
+                        <p style="font-size: 0.75rem;" class="mb-0 text-muted">Visualizes FP/FN for error analysis.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card p-4 border-0 shadow-sm rounded-4 h-100">
+            <h5 class="fw-bold mb-4">Metric Comparison</h5>
+            <canvas id="comparisonChart"></canvas>
+            <div class="mt-4 small text-muted italic">
+                * Metrics validated on 20% test-set from <code>student_data.xlsx</code>.
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const ctx = document.getElementById('comparisonChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Accuracy', 'F1-Score', 'Precision', 'Recall', 'ROC-AUC'],
+            datasets: [
+                {
+                    label: 'Logistic Regression',
+                    data: [
+                        {{ metrics['Logistic Regression'].accuracy if 'Logistic Regression' in metrics else 0 }},
+                {{ metrics['Logistic Regression'].f1 if 'Logistic Regression' in metrics else 0 }},
+                        {{ metrics['Logistic Regression'].precision if 'Logistic Regression' in metrics else 0 }},
+        {{ metrics['Logistic Regression'].recall if 'Logistic Regression' in metrics else 0 }},
+        {{ metrics['Logistic Regression'].roc_auc if 'Logistic Regression' in metrics else 0 }}
+                    ],
+        borderColor: '#667eea',
+        backgroundColor: 'rgba(102, 126, 234, 0.2)'
+                },
+        {
+            label: 'Random Forest',
+            data: [
+                {{ metrics['Random Forest'].accuracy if 'Random Forest' in metrics else 0 }},
+        {{ metrics['Random Forest'].f1 if 'Random Forest' in metrics else 0 }},
+        {{ metrics['Random Forest'].precision if 'Random Forest' in metrics else 0 }},
+        {{ metrics['Random Forest'].recall if 'Random Forest' in metrics else 0 }},
+        {{ metrics['Random Forest'].roc_auc if 'Random Forest' in metrics else 0 }}
+                    ],
+        borderColor: '#2ed573',
+        backgroundColor: 'rgba(46, 213, 115, 0.2)'
+                },
+        {
+            label: 'XGBoost',
+            data: [
+                {{ metrics['XGBoost'].accuracy if 'XGBoost' in metrics else 0 }},
+        {{ metrics['XGBoost'].f1 if 'XGBoost' in metrics else 0 }},
+        {{ metrics['XGBoost'].precision if 'XGBoost' in metrics else 0 }},
+        {{ metrics['XGBoost'].recall if 'XGBoost' in metrics else 0 }},
+        {{ metrics['XGBoost'].roc_auc if 'XGBoost' in metrics else 0 }}
+                    ],
+        borderColor: '#0470dc',
+        backgroundColor: 'rgba(4, 112, 220, 0.2)'
+                }
+            ]
+        },
+        options: {
+        scales: {
+            r: {
+                beginAtZero: true,
+                max: 1.0
+            }
+        }
+    }
+    });
+</script>
+{% endblock %}
