@@ -299,9 +299,9 @@ The system was evaluated with 18 structured functional test cases covering authe
 ## Author
 
 Satkunam Tishalan
-BSc in Data Science, London Metropolitan University
-London Met ID: 25027320
-Email: SAT1177@my.londonmet.ac.uk
+- BSc in Data Science, London Metropolitan University
+- London Met ID: 25027320
+- Email: SAT1177@my.londonmet.ac.uk
 
 Supervisors: Mr. E. Mithurshanan and Mr. V. Jathushan
 
