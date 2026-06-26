@@ -6,7 +6,7 @@ An intelligent, integrated academic monitoring platform combining IoT attendance
 
 ## About This Project
 
-The Smart Academic Companion System was developed as a Final Year Project for the BSc in Data Science at ESOFT / London Metropolitan University by Satkunam Tishalan (E225097 / 25027320).
+The Smart Academic Companion System was developed as a Final Year Project for the BSc in Data Science at London Metropolitan University by Satkunam Tishalan (LMU ID - 25027320).
 
 Traditional academic monitoring systems are reactive — problems like poor attendance or declining grades are only noticed after significant damage has occurred. This system replaces that reactive approach with an intelligent, automated, and proactive platform that brings together three cutting-edge technologies into a single unified web application.
 
@@ -15,34 +15,37 @@ Traditional academic monitoring systems are reactive — problems like poor atte
 ## Screenshots
 
 ### Admin Dashboard
+<img width="822" height="403" alt="image" src="https://github.com/user-attachments/assets/c5461edc-cde3-43c5-9234-3c354b321f34" />
+
 The centralized control panel showing total students, lecturers, courses, high-risk student count, and real-time risk distribution analytics.
 
-![Admin Dashboard](screenshots/admin_dashboard.png)
-
 ### User Management
+<img width="797" height="466" alt="image" src="https://github.com/user-attachments/assets/8daa2933-1a37-4638-b482-56ef0551dda9" />
+
 Full CRUD management for all student and lecturer accounts with role assignment, advanced search, and filtering across 100,000+ records.
 
-![User Management](screenshots/user_management.png)
-
 ### System Analytics
+<img width="873" height="609" alt="image" src="https://github.com/user-attachments/assets/0ef8007a-d0cb-46e5-99fb-2ff6f321e658" />
+
 Real-time institutional risk distribution chart, overall dropout risk percentage, average attendance, graduation confidence, and departmental GPA breakdown.
 
-![System Analytics](screenshots/system_analytics.png)
-
 ### Lecturer Dashboard
+<img width="842" height="886" alt="image" src="https://github.com/user-attachments/assets/b8ed7eca-a5e5-4c37-93bf-4c25ba23389f" />
+
+
 Quick overview of active modules, pending grading, at-risk students, performance trends, recent alerts, and dropout risk monitoring table.
 
-![Lecturer Dashboard](screenshots/lecturer_dashboard.png)
-
 ### Student Dashboard
+<img width="871" height="1178" alt="image" src="https://github.com/user-attachments/assets/ebb0b78d-ffd7-4e0f-a8bd-123ac7eba486" />
+
+
 Personal academic overview including current GPA, attendance, AI-predicted dropout risk, graduation probability, enrolled modules, upcoming deadlines, and AI advisor insights.
 
-![Student Dashboard](screenshots/student_dashboard.png)
-
 ### AI Study Aid
+<img width="777" height="473" alt="image" src="https://github.com/user-attachments/assets/7554f21e-6417-44a8-8330-c5b24aaa6e43" />
+
 Students can upload lecture slides or PDF files and let the AI generate detailed, concept-rich study notes instantly using Google Gemini AI.
 
-![AI Study Aid](screenshots/ai_study_aid.png)
 
 ---
 
